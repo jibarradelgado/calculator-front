@@ -35,7 +35,6 @@ export const useLogin = ({ onDone }: { onDone: () => void }) => {
       
       const authToken = response.headers.get('Authorization'); 
 
-      console.log(authToken)
       if (authToken && typeof authToken === 'string') {
         await saveToken(authToken)
         onDone()
@@ -84,7 +83,11 @@ export function removeToken() {
   })
 }
 
-export type User = { username: string; id: string }
+export type User = { 
+  username: string 
+  id: string 
+  balance: number
+}
 
 export function useFetchCurrentUser() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
@@ -109,8 +112,6 @@ export function useFetchCurrentUser() {
           },
         })
 
-        console.log(response)
-
         if (!response.ok) {
           throw new Error(`Unauthorized request`)
         }
@@ -118,7 +119,7 @@ export function useFetchCurrentUser() {
         const data = await response.json()
         if (data && typeof data.username === 'string') {
           setStatus('success')
-          setUser({ username: data.username, id: data.id })
+          setUser({ username: data.username, id: data.userId, balance: data.balance })
           return
         }
 

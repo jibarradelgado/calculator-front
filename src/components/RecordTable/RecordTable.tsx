@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import axios from 'axios';
 import {
   Table,
   TableBody,
@@ -14,6 +15,10 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material'
+import { useCurrentUser } from '@store/AuthContext';
+import { retrieveToken } from '@service/auth';
+
+import { baseUrl, TOKEN_KEY } from '@service/config';
 
 interface Record {
   id: number;
@@ -29,9 +34,33 @@ interface Props {
   onDeleteRecord: (recordId: number) => void;
 }
 
-const RecordTable: React.FC<Props> = ({records, onDeleteRecord}) => {
+const RecordTable: React.FC<Props> = () => {
+  const { user } = useCurrentUser()
+  const [records, setRecords ] = useState([] as Record[])
   const [deleteDialogOpen, setDeleteDialogOpen ] = useState(false)
   const [recordToDelete, setRecordToDelete] = useState<Record | null>(null)
+
+  useEffect(() => {
+    const getRecords = async () => {
+      const token = `Bearer ${await retrieveToken()}`
+      console.log(token)
+      axios.get(`${baseUrl}/calculator/api/v1/records?userId=${user?.id}`, {
+        headers: {
+          Authorization: token
+        }
+      })
+        .then(res => {
+          console.log(res.data)
+          setRecords(res.data as Record[])
+        })
+        .catch(err =>{
+          console.log(err)
+          setRecords([] as Record[])
+        })
+    }
+
+    getRecords()
+  }, [])
 
   const handleDeleteDialogOpen = (record: Record) => {
     setRecordToDelete(record);
@@ -45,14 +74,14 @@ const RecordTable: React.FC<Props> = ({records, onDeleteRecord}) => {
 
   const handleConfirmDelete = () => {
     if (recordToDelete) {
-      onDeleteRecord(recordToDelete.id);
+      // onDeleteRecord(recordToDelete.id);
     }
     setDeleteDialogOpen(false);
     setRecordToDelete(null);
   };
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ mt: 5 }}>
       <Table>
         <TableHead>
           <TableRow>

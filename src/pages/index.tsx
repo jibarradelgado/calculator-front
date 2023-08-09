@@ -7,7 +7,6 @@ import Login from "@components/Login/Login"
 
 const HomePage = () => {
   const { user, status } = useCurrentUser()
-  console.log(user)
 
   if (user == null) {
     return <Login />

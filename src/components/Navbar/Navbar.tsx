@@ -19,13 +19,13 @@ const Navbar = () => {
         </Typography>
         { (user && user!=null) && 
         <>
-          <Typography variant="body1" sx={{ marginRight: 20 }}>
-          {/* Balance: {balance} credits */}
+          <Typography variant="body1" sx={{ marginRight: 3 }}>
+            Balance: {user.balance} credits
           </Typography>
           <Button color="inherit">
             Top up credits
           </Button>
-          <Button color="inherit">
+          <Button color="inherit" onClick={logout}>
             Logout
           </Button>
         </>
