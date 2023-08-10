@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   FormControl,
   InputLabel,
@@ -8,49 +8,165 @@ import {
   Button,
   Typography,
   Container,
-} from '@mui/material';
+  Checkbox,
+  FormControlLabel,
+} from '@mui/material'
+import axios from 'axios'
+import { useCurrentUser } from '@store/AuthContext'
+import { retrieveToken } from '@service/auth'
+import { baseUrl, TOKEN_KEY } from '@service/config'
+
+interface Operation {
+  id: number
+  type: string
+  cost: number
+}
 
 const OperationForm = () => {
-  const [selectedOperation, setSelectedOperation ] = useState('addition');
-  const [ number1, setNumber1 ] = useState(0.0);
-  const [ number2, setNumber2 ] = useState(0.0);
+  const { user } = useCurrentUser()
+  const [selectedOperation, setSelectedOperation ] = useState('')
+  const [operations, setOperations] = useState([] as Operation[])
+  const [ number1, setNumber1 ] = useState(0.0)
+  const [ number2, setNumber2 ] = useState(0.0)
+  const [ operationResult, setOperationResult ] = useState('')
+  const [ numStrings, setNumStrings] = useState(1)
+  const [ stringLength, setStringLength ] = useState(1)
+  const [ includeDigits, setIncludeDigits ] = useState(true)
+  const [ includeUpperAlpha, setIncludeUpperAlpha ] = useState(true)
+  const [ includeLowerAlpha, setIncludeLowerAlpha ] = useState(true)
+  const [ unique, setUnique ] = useState(true)
+  
+  useEffect(() => {
+    const getOperations = async () => {
+      const token = `Bearer ${await retrieveToken()}`
+      axios.get(`${baseUrl}/calculator/api/v1/operations`, {
+        headers: {
+          Authorization: token
+        }
+      })
+        .then(res => { 
+          console.log(res.data)
+          setOperations(res.data as Operation[])
+        })
+        .catch(err =>{
+          console.log(err)
+          setOperations([] as Operation[])
+        })
+    }
+
+    getOperations()
+  }, [])
 
   return (
     <>
+    <Container maxWidth="sm" sx={{ mt: 3}}>
       <form>
         <Typography variant='h6'>New Operation</Typography>
-        <FormControl fullWidth margin='normal'>
+        <FormControl fullWidth margin='normal' >
           <InputLabel>Operation</InputLabel>
-          <Select>
-            <MenuItem>Addition</MenuItem>
+          <Select value={selectedOperation} onChange={(e) => {
+            console.log(e.target.value)
+            setSelectedOperation(e.target.value)
+            }}>
+            {
+              operations && operations.map((operation) => (
+                <MenuItem key={operation.id} value={operation.type}>
+                  {operation.type}
+                </MenuItem>
+              ))
+            }
           </Select>
         </FormControl>
-        <div>
-          <TextField 
-            label="Number 1"
-            value={number1}
-            onChange={(e) => setNumber1(1)}
-            margin='normal'
-            variant='outlined'
-            fullWidth
-          />
-          <TextField 
-            label="Number 2"
-            value={number2}
-            onChange={(e) => setNumber2(2)}
-            margin='normal'
-            variant='outlined'
-            fullWidth
-          />
-        </div>  
+        {selectedOperation !== 'RANDOM_STRING' && selectedOperation !== 'RANDOM_STRING' && 
+          (<div>
+            <TextField 
+              label="Number 1"
+              value={number1}
+              onChange={(e) => setNumber1(1)}
+              margin='normal'
+              variant='outlined'
+              fullWidth
+            />
+            {
+              selectedOperation !== 'SQUARE_ROOT' && 
+              <TextField 
+              label="Number 2"
+              value={number2}
+              onChange={(e) => setNumber2(2)}
+              margin='normal'
+              variant='outlined'
+              fullWidth
+            />
+            }
+          </div>)
+        }
+        {selectedOperation === 'RANDOM_STRING' && (
+  <div>
+    <TextField 
+      label="Number of Strings"
+      value={numStrings}
+      type='number'
+      onChange={(e) => setNumStrings(Number(e.target.value))}
+      margin='normal'
+      variant='outlined'
+      fullWidth
+    />
+    <TextField 
+      label="Length of Strings"
+      value={stringLength}
+      type='number'
+      onChange={(e) => setStringLength(Number(e.target.value))}
+      margin='normal'
+      variant='outlined'
+      fullWidth
+    />
+    <FormControlLabel
+      control={
+        <Checkbox
+          checked={includeDigits}
+          onChange={(e) => setIncludeDigits(e.target.checked)}
+        />
+      }
+      label="Include Digits"
+    />
+    <FormControlLabel
+      control={
+        <Checkbox
+          checked={includeUpperAlpha}
+          onChange={(e) => setIncludeUpperAlpha(e.target.checked)}
+        />
+      }
+      label="Include Uppercase Letters"
+    />
+    <FormControlLabel
+      control={
+        <Checkbox
+          checked={includeLowerAlpha}
+          onChange={(e) => setIncludeLowerAlpha(e.target.checked)}
+        />
+      }
+      label="Include Lowercase Letters"
+    />
+    <FormControlLabel
+      control={
+        <Checkbox
+          checked={unique}
+          onChange={(e) => setUnique(e.target.checked)}
+        />
+      }
+      label="Unique Strings"
+    />
+  </div>
+)}
         {/* More conditional rendering for other operations */}
         <Button type="submit" variant="contained" color="primary">
           Perform Operation
         </Button>
       </form>
-      <Container>
-        <Typography variant='body1'>Operation: 2 + 2 = 4</Typography>
+      <Container sx={{mt:4}}>
+        <Typography variant='body1'>Operation: {operationResult}</Typography>
       </Container>
+    </Container>
     </>
   )
 }

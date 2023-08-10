@@ -31,11 +31,6 @@ interface Record {
   operationResponse: string
 }
 
-interface Page {
-  count: number
-  Records: Record[]
-}
-
 interface Props {
   records: Record[]
   onDeleteRecord: (recordId: number) => void
@@ -57,15 +52,12 @@ const RecordTable: React.FC<Props> = () => {
     const getRecords = async () => {
       const token = `Bearer ${await retrieveToken()}`
       const encodedOperationResponse = encodeURIComponent(searchQuery)
-      console.log(`${baseUrl}/calculator/api/v1/records?userId=${user?.id}&page=${page}&elements=${rowsPerPage}&sortBy=${orderBy}&sortDirection=${order}&operationResult=${encodedOperationResponse}`)
       axios.get(`${baseUrl}/calculator/api/v1/records?userId=${user?.id}&page=${page}&elements=${rowsPerPage}&sortBy=${orderBy}&sortDirection=${order}&operationResult=${encodedOperationResponse}`, {
         headers: {
           Authorization: token
         }
       })
         .then(res => { 
-          console.log(res.data)
-          console.log(res.data.content)
           setRecords(res.data.content as Record[])
           setCount(res.data.totalElements)
         })
@@ -76,7 +68,7 @@ const RecordTable: React.FC<Props> = () => {
     }
 
     getRecords()
-  }, [user?.id, page, rowsPerPage, orderBy, order, searchQuery])
+  }, [user?.id, page, rowsPerPage, orderBy, order, searchQuery, records])
 
   const handleDeleteDialogOpen = (record: Record) => {
     setRecordToDelete(record);
@@ -88,9 +80,24 @@ const RecordTable: React.FC<Props> = () => {
     setRecordToDelete(null);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (recordToDelete) {
-      // onDeleteRecord(recordToDelete.id);
+      console.log(recordToDelete)
+      const token = `Bearer ${await retrieveToken()}`
+      console.log(token)
+      axios.patch(`${baseUrl}/calculator/api/v1/records/delete`, {
+        recordId: recordToDelete.record_id
+      }, {
+        headers: {
+          Authorization: token
+        }
+      })
+      .then(() => {
+        setRecords(records.filter(record => record.record_id !== recordToDelete.record_id))
+      })
+      .catch(err => {
+        console.log(err)
+      })
     }
     setDeleteDialogOpen(false);
     setRecordToDelete(null);
