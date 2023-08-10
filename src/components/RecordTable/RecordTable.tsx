@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import axios from 'axios';
+import React, { useState, Dispatch, SetStateAction } from 'react'
+import axios from 'axios'
 import {
   Table,
   TableBody,
@@ -17,10 +17,11 @@ import {
   TextField,
   TablePagination,
 } from '@mui/material'
-import { useCurrentUser } from '@store/AuthContext';
-import { retrieveToken } from '@service/auth';
+import { useCurrentUser } from '@store/AuthContext'
+import { retrieveToken } from '@service/auth'
 
-import { baseUrl, TOKEN_KEY } from '@service/config';
+import { baseUrl } from '@service/config'
+import { Pagination } from '@components/App/MainApp'
 
 interface Record {
   record_id: number
@@ -33,41 +34,25 @@ interface Record {
 
 interface Props {
   records: Record[]
-  onDeleteRecord: (recordId: number) => void
+  recordCount: number
+  onUpdateRecords: () => void
+  pagination: Pagination
+  setPagination: Dispatch<SetStateAction<Pagination>>
+  searchQuery: string
+  setSearchQuery: Dispatch<SetStateAction<string>>
 }
 
-const RecordTable: React.FC<Props> = () => {
-  const { user } = useCurrentUser()
-  const [records, setRecords] = useState([] as Record[])
-  const [count, setCount] = useState(0)
+const RecordTable: React.FC<Props> = ({
+  onUpdateRecords,
+  records,
+  recordCount,
+  pagination,
+  setPagination,
+  searchQuery,
+  setSearchQuery, 
+}) => {
   const [deleteDialogOpen, setDeleteDialogOpen ] = useState(false)
   const [recordToDelete, setRecordToDelete] = useState<Record | null>(null)
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [orderBy, setOrderBy] = useState<string>('date_time'); // Default sorting by dateTime
-  const [order, setOrder] = useState<'ASC' | 'DESC'>('DESC'); // Default sorting order
-  const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    const getRecords = async () => {
-      const token = `Bearer ${await retrieveToken()}`
-      const encodedOperationResponse = encodeURIComponent(searchQuery)
-      axios.get(`${baseUrl}/calculator/api/v1/records?userId=${user?.id}&page=${page}&elements=${rowsPerPage}&sortBy=${orderBy}&sortDirection=${order}&operationResult=${encodedOperationResponse}`, {
-        headers: {
-          Authorization: token
-        }
-      })
-        .then(res => { 
-          setRecords(res.data.content as Record[])
-          setCount(res.data.totalElements)
-        })
-        .catch(err =>{
-          console.log(err)
-          setRecords([] as Record[])
-        })
-    }
-    getRecords()
-  }, [user?.id, page, rowsPerPage, orderBy, order, searchQuery, count])  
 
   const handleDeleteDialogOpen = (record: Record) => {
     setRecordToDelete(record);
@@ -90,8 +75,7 @@ const RecordTable: React.FC<Props> = () => {
         }
       })
       .then(() => {
-        setCount(count - 1)
-        setRecords(records.filter(record => record.record_id !== recordToDelete.record_id))
+        onUpdateRecords()
       })
       .catch(err => {
         console.log(err)
@@ -102,21 +86,27 @@ const RecordTable: React.FC<Props> = () => {
   };
 
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
-    setPage(newPage);
+    setPagination((prevPagination) => ({...prevPagination, page: newPage}))
   };
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      rowsPerPage: parseInt(event.target.value, 10), 
+      page: 0}))
+  }
 
-  const handleSortRequest = (property: string) => {
-    const isAsc = orderBy === property && order === 'ASC';
-    setOrder(isAsc ? 'DESC' : 'ASC');
-    setOrderBy(property);
-  };
+  const handleSortRequest = (property: 'date_time' | 'operation_type' ) => {
+    const isAsc = pagination.orderBy === property && pagination.order === 'ASC'
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      orderBy: property,
+      order: isAsc ? 'DESC' : 'ASC',
+      page: 0, // Reset page when changing sort order or property
+    }))
+  }
 
   return (
     <>
@@ -167,9 +157,9 @@ const RecordTable: React.FC<Props> = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 20]}
           component="div"
-          count={count}
-          rowsPerPage={rowsPerPage}
-          page={page}
+          count={recordCount}
+          rowsPerPage={pagination.rowsPerPage}
+          page={pagination.page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />

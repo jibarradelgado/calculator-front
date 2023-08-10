@@ -22,7 +22,13 @@ interface Operation {
   cost: number
 }
 
-const OperationForm = () => {
+interface Props {
+  onUpdateRecords: () => void
+}
+
+const OperationForm: React.FC<Props> = ({
+  onUpdateRecords,
+}) => {
   const { user, updateUserBalance } = useCurrentUser()
   const [selectedOperation, setSelectedOperation ] = useState('')
   const [operations, setOperations] = useState([] as Operation[])
@@ -45,8 +51,6 @@ const OperationForm = () => {
         }
       })
         .then(res => { 
-          console.log(res.data)
-          
           setOperations(res.data as Operation[])
         })
         .catch(err =>{
@@ -78,6 +82,7 @@ const OperationForm = () => {
             updateUserBalance(user.balance - operation.cost)
           }
           setOperationResult(`${number1} + ${number2} = ${res.data}`)
+          onUpdateRecords()
         })
         .catch(err => {
           console.log(err)
@@ -99,6 +104,7 @@ const OperationForm = () => {
             updateUserBalance(user.balance - operation.cost)
           }
           setOperationResult(`${number1} - ${number2} = ${res.data}`)
+          onUpdateRecords()
         })
         .catch(err => {
           console.log(err)
@@ -120,6 +126,7 @@ const OperationForm = () => {
             updateUserBalance(user.balance - operation.cost)
           }
           setOperationResult(`${number1} * ${number2} = ${res.data}`)
+          onUpdateRecords()
         })
         .catch(err => {
           console.log(err)
@@ -141,6 +148,7 @@ const OperationForm = () => {
             updateUserBalance(user.balance - operation.cost)
           }
           setOperationResult(`${number1} / ${number2} = ${res.data}`)
+          onUpdateRecords()
         })
         .catch(err => {
           console.log(err)
@@ -161,6 +169,7 @@ const OperationForm = () => {
             updateUserBalance(user.balance - operation.cost)
           }
           setOperationResult(`√${number1} = ${res.data}`)
+          onUpdateRecords()
         })
         .catch(err => {
           console.log(err)
@@ -186,6 +195,7 @@ const OperationForm = () => {
             updateUserBalance(user.balance - operation.cost)
           }
           setOperationResult(`${res.data}`)
+          onUpdateRecords()
         })
         .catch(err => {
           console.log(err)
