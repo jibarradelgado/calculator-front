@@ -133,5 +133,14 @@ export function useFetchCurrentUser() {
     validateAsync()
   }, [])
 
-  return { status, user }
+  const updateUserBalance = (newBalance: number) => {
+    setUser((prevUser) => {
+      if(prevUser) {
+        return { ...prevUser, balance: newBalance}
+      }
+      return prevUser
+    })
+  }
+
+  return { status, user, setUser, updateUserBalance }
 }

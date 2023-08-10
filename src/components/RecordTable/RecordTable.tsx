@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import axios from 'axios';
 import {
   Table,
@@ -66,9 +66,8 @@ const RecordTable: React.FC<Props> = () => {
           setRecords([] as Record[])
         })
     }
-
     getRecords()
-  }, [user?.id, page, rowsPerPage, orderBy, order, searchQuery, records])
+  }, [user?.id, page, rowsPerPage, orderBy, order, searchQuery, count])  
 
   const handleDeleteDialogOpen = (record: Record) => {
     setRecordToDelete(record);
@@ -82,9 +81,7 @@ const RecordTable: React.FC<Props> = () => {
 
   const handleConfirmDelete = async () => {
     if (recordToDelete) {
-      console.log(recordToDelete)
       const token = `Bearer ${await retrieveToken()}`
-      console.log(token)
       axios.patch(`${baseUrl}/calculator/api/v1/records/delete`, {
         recordId: recordToDelete.record_id
       }, {
@@ -93,6 +90,7 @@ const RecordTable: React.FC<Props> = () => {
         }
       })
       .then(() => {
+        setCount(count - 1)
         setRecords(records.filter(record => record.record_id !== recordToDelete.record_id))
       })
       .catch(err => {

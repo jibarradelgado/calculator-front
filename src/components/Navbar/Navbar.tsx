@@ -1,14 +1,34 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 import { useCurrentUser } from '@store/AuthContext';
-import { removeToken } from '@service/auth';
+import { removeToken, retrieveToken } from '@service/auth';
+import axios from 'axios';
+import { baseUrl } from '@service/config';
 
 const Navbar = () => {
-  const { user } = useCurrentUser()
+  const { user, updateUserBalance } = useCurrentUser()
 
   const logout = async() => {
     await removeToken()
     window.location.reload()
+  }
+
+  const handleTopup = async () => {
+    const token = `Bearer ${await retrieveToken()}`
+    axios.post(`${baseUrl}/calculator/api/v1/users/topup?userId=${user?.id}`,
+    null, {
+      headers: {
+        Authorization: token
+      }
+    })
+    .then(res => {
+      if(user) {
+        updateUserBalance(res.data.balance)
+      }
+    })
+    .catch(err => {
+      console.log(err)
+    })
   }
 
   return (
@@ -22,7 +42,7 @@ const Navbar = () => {
           <Typography variant="body1" sx={{ marginRight: 3 }}>
             Balance: {user.balance} credits
           </Typography>
-          <Button color="inherit">
+          <Button color="inherit" onClick={handleTopup}>
             Top up credits
           </Button>
           <Button color="inherit" onClick={logout}>

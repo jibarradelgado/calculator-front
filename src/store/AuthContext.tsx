@@ -5,7 +5,9 @@ type AuthState = ReturnType<typeof useFetchCurrentUser>
 
 const defaultState: AuthState = {
   user: null,
-  status: 'idle'
+  status: 'idle',
+  setUser: () => {},
+  updateUserBalance: () => {}
 }
 
 const AuthContext = createContext<AuthState>(defaultState)

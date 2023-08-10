@@ -23,7 +23,7 @@ interface Operation {
 }
 
 const OperationForm = () => {
-  const { user } = useCurrentUser()
+  const { user, updateUserBalance } = useCurrentUser()
   const [selectedOperation, setSelectedOperation ] = useState('')
   const [operations, setOperations] = useState([] as Operation[])
   const [ number1, setNumber1 ] = useState(0.0)
@@ -46,6 +46,7 @@ const OperationForm = () => {
       })
         .then(res => { 
           console.log(res.data)
+          
           setOperations(res.data as Operation[])
         })
         .catch(err =>{
@@ -57,10 +58,147 @@ const OperationForm = () => {
     getOperations()
   }, [])
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = `Bearer ${await retrieveToken()}`
+    switch (selectedOperation) {
+      case 'ADDITION':
+        axios.post(`${baseUrl}/calculator/api/v1/calculator/addition`, {
+          userId: user?.id,
+          num1: number1,
+          num2: number2
+        }, {
+          headers: {
+            Authorization: token
+          }
+        })
+        .then(res => {
+          const operation = operations.find(elem => elem.type == 'ADDITION')
+          if(operation && user) {
+            updateUserBalance(user.balance - operation.cost)
+          }
+          setOperationResult(`${number1} + ${number2} = ${res.data}`)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        break;
+      case 'SUBTRACTION':
+        axios.post(`${baseUrl}/calculator/api/v1/calculator/subtraction`, {
+          userId: user?.id,
+          num1: number1,
+          num2: number2
+        }, {
+          headers: {
+            Authorization: token
+          }
+        })
+        .then(res => {
+          const operation = operations.find(elem => elem.type == 'SUBTRACTION')
+          if(operation && user) {
+            updateUserBalance(user.balance - operation.cost)
+          }
+          setOperationResult(`${number1} - ${number2} = ${res.data}`)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        break;
+      case 'MULTIPLICATION':
+        axios.post(`${baseUrl}/calculator/api/v1/calculator/multiplication`, {
+          userId: user?.id,
+          num1: number1,
+          num2: number2
+        }, {
+          headers: {
+            Authorization: token
+          }
+        })
+        .then(res => {
+          const operation = operations.find(elem => elem.type == 'MULTIPLICATION')
+          if(operation && user) {
+            updateUserBalance(user.balance - operation.cost)
+          }
+          setOperationResult(`${number1} * ${number2} = ${res.data}`)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        break;
+      case 'DIVISION':
+        axios.post(`${baseUrl}/calculator/api/v1/calculator/division`, {
+          userId: user?.id,
+          num1: number1,
+          num2: number2
+        }, {
+          headers: {
+            Authorization: token
+          }
+        })
+        .then(res => {
+          const operation = operations.find(elem => elem.type == 'DIVISION')
+          if(operation && user) {
+            updateUserBalance(user.balance - operation.cost)
+          }
+          setOperationResult(`${number1} / ${number2} = ${res.data}`)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        break;
+      case 'SQUARE_ROOT':
+        axios.post(`${baseUrl}/calculator/api/v1/calculator/square_root`, {
+          userId: user?.id,
+          num1: number1,
+        }, {
+          headers: {
+            Authorization: token
+          }
+        })
+        .then(res => {
+          const operation = operations.find(elem => elem.type == 'SQUARE_ROOT')
+          if(operation && user) {
+            updateUserBalance(user.balance - operation.cost)
+          }
+          setOperationResult(`√${number1} = ${res.data}`)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        break;
+      case 'RANDOM_STRING':
+        axios.post(`${baseUrl}/calculator/api/v1/randomstring`, {
+          userId: user?.id,
+          num: numStrings,
+          len: stringLength,
+          digits: includeDigits,
+          upperAlpha: includeUpperAlpha,
+          lowerAlpha: includeLowerAlpha,
+          unique: unique,
+        }, {
+          headers: {
+            Authorization: token
+          }
+        })
+        .then(res => {
+          const operation = operations.find(elem => elem.type == 'RANDOM_STRING')
+          if(operation && user) {
+            updateUserBalance(user.balance - operation.cost)
+          }
+          setOperationResult(`${res.data}`)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        break;
+    }
+
+  }
+
   return (
     <>
     <Container maxWidth="sm" sx={{ mt: 3}}>
-      <form>
+      <form onSubmit={handleSubmit}>
         <Typography variant='h6'>New Operation</Typography>
         <FormControl fullWidth margin='normal' >
           <InputLabel>Operation</InputLabel>
@@ -82,7 +220,7 @@ const OperationForm = () => {
             <TextField 
               label="Number 1"
               value={number1}
-              onChange={(e) => setNumber1(1)}
+              onChange={(e) => setNumber1(Number(e.target.value))}
               margin='normal'
               variant='outlined'
               fullWidth
@@ -92,7 +230,7 @@ const OperationForm = () => {
               <TextField 
               label="Number 2"
               value={number2}
-              onChange={(e) => setNumber2(2)}
+              onChange={(e) => setNumber2(Number(e.target.value))}
               margin='normal'
               variant='outlined'
               fullWidth
