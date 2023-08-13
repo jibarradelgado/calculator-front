@@ -5,6 +5,8 @@ import MainApp from "@components/App/MainApp"
 import Layout from "@components/Layout/Layout"
 import Login from "@components/Login/Login"
 
+
+
 const HomePage = () => {
   const { user, status } = useCurrentUser()
 

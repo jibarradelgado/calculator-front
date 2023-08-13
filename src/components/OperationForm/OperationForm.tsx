@@ -10,11 +10,13 @@ import {
   Container,
   Checkbox,
   FormControlLabel,
+  Alert,
 } from '@mui/material'
 import axios from 'axios'
 import { useCurrentUser } from '@store/AuthContext'
 import { retrieveToken } from '@service/auth'
 import { baseUrl, TOKEN_KEY } from '@service/config'
+import { useError } from '@store/ErrorContext'
 
 interface Operation {
   id: number
@@ -26,9 +28,9 @@ interface Props {
   onUpdateRecords: () => void
 }
 
-const OperationForm: React.FC<Props> = ({
+const OperationForm = ({
   onUpdateRecords,
-}) => {
+}: Props) => {
   const { user, updateUserBalance } = useCurrentUser()
   const [selectedOperation, setSelectedOperation ] = useState('')
   const [operations, setOperations] = useState([] as Operation[])
@@ -41,6 +43,7 @@ const OperationForm: React.FC<Props> = ({
   const [ includeUpperAlpha, setIncludeUpperAlpha ] = useState(true)
   const [ includeLowerAlpha, setIncludeLowerAlpha ] = useState(true)
   const [ unique, setUnique ] = useState(true)
+  const errorContext = useError()
   
   useEffect(() => {
     const getOperations = async () => {
@@ -86,6 +89,7 @@ const OperationForm: React.FC<Props> = ({
         })
         .catch(err => {
           console.log(err)
+          errorContext.showErrorAlert(err.response.data)
         })
         break;
       case 'SUBTRACTION':
@@ -108,6 +112,7 @@ const OperationForm: React.FC<Props> = ({
         })
         .catch(err => {
           console.log(err)
+          errorContext.showErrorAlert(err.response.data)
         })
         break;
       case 'MULTIPLICATION':
@@ -130,6 +135,7 @@ const OperationForm: React.FC<Props> = ({
         })
         .catch(err => {
           console.log(err)
+          errorContext.showErrorAlert(err.response.data)
         })
         break;
       case 'DIVISION':
@@ -152,6 +158,7 @@ const OperationForm: React.FC<Props> = ({
         })
         .catch(err => {
           console.log(err)
+          errorContext.showErrorAlert(err.response.data)
         })
         break;
       case 'SQUARE_ROOT':
@@ -173,6 +180,7 @@ const OperationForm: React.FC<Props> = ({
         })
         .catch(err => {
           console.log(err)
+          errorContext.showErrorAlert(err.response.data)
         })
         break;
       case 'RANDOM_STRING':
@@ -199,6 +207,7 @@ const OperationForm: React.FC<Props> = ({
         })
         .catch(err => {
           console.log(err)
+          errorContext.showErrorAlert(err.response.data)
         })
         break;
     }
@@ -212,7 +221,8 @@ const OperationForm: React.FC<Props> = ({
         <Typography variant='h6'>New Operation</Typography>
         <FormControl fullWidth margin='normal' >
           <InputLabel >Operation</InputLabel>
-          <Select aria-label='Operation' value={selectedOperation} onChange={(e) => {
+          <Select aria-label='Operation' value={selectedOperation}
+            onChange={(e) => {
             setSelectedOperation(e.target.value)
             }}>
             {

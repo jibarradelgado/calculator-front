@@ -25,6 +25,15 @@ export interface Pagination {
   order: 'ASC' | 'DESC'
 }
 
+export interface Errors {
+  errorAlert: { message: string, open: boolean },
+  setErrorAlert: React.Dispatch<React.SetStateAction<{
+    message: string
+    open: boolean
+  }>>
+  showErrorAlert: (message: string) => void
+}
+
 const MainApp = () => {
   const { user } = useCurrentUser()
   const [records, setRecords] = useState([] as Record[])
@@ -37,6 +46,11 @@ const MainApp = () => {
     order: 'DESC',
   }
   const [pagination, setPagination] = useState(initialPaginationState)
+  const [ errorAlert, setErrorAlert ] = useState<{message: string, open: boolean}>({
+    message: '',
+    open: false,
+  })
+
 
   const fetchRecords = async () => {
     const token = `Bearer ${await retrieveToken()}`
@@ -59,6 +73,14 @@ const MainApp = () => {
   useEffect(() => {
     fetchRecords()
   },[user?.id, searchQuery, pagination.page, pagination.rowsPerPage, pagination.orderBy, pagination.order])
+
+  const showErrorAlert = (message: string) => {
+    setErrorAlert({message, open: true})
+
+    setTimeout(() => {
+      setErrorAlert(prevState => ({...prevState, open:false }))
+    }, 10000)
+  }
 
   return (
     <Layout title='Calculator Dashboard'>
