@@ -211,9 +211,8 @@ const OperationForm: React.FC<Props> = ({
       <form onSubmit={handleSubmit}>
         <Typography variant='h6'>New Operation</Typography>
         <FormControl fullWidth margin='normal' >
-          <InputLabel>Operation</InputLabel>
-          <Select value={selectedOperation} onChange={(e) => {
-            console.log(e.target.value)
+          <InputLabel >Operation</InputLabel>
+          <Select aria-label='Operation' value={selectedOperation} onChange={(e) => {
             setSelectedOperation(e.target.value)
             }}>
             {

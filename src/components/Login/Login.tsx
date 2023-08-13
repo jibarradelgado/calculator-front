@@ -4,7 +4,7 @@ import Layout from "../Layout/Layout"
 import { useLogin } from "@service/auth"
 
 const Login = () => {
-  const { login, message, isLoading } = useLogin({
+  const { login, message } = useLogin({
     onDone: () => window.location.replace('/')
   })
 
