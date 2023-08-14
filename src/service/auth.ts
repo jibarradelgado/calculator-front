@@ -18,7 +18,6 @@ export const useLogin = ({ onDone }: { onDone: () => void }) => {
       setMessage('')
       const response = await fetch(`${baseUrl}/calculator/api/v1/auth/login`, {
         method: 'POST',
-        referrerPolicy: 'unsafe-url',
         headers: {
           'Content-Type': 'application/json',
         },
