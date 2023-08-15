@@ -133,24 +133,30 @@ const RecordTable: React.FC<Props> = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {records.map((record) => (
-              <TableRow key={record.record_id}>
-                <TableCell>{record.operationType}</TableCell>
-                <TableCell>{record.dateTime}</TableCell>
-                <TableCell>{record.balanceBefore}</TableCell>
-                <TableCell>{record.balanceAfter}</TableCell>
-                <TableCell>{record.operationResponse}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    onClick={() => handleDeleteDialogOpen(record)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {records.map((record) => {
+              const date = new Date(record.dateTime)
+              const formattedDate = date.toISOString().slice(0, 10)
+              const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              const formattedDateTime = `${formattedDate} ${formattedTime}`
+
+              return( 
+                <TableRow key={record.record_id}>
+                  <TableCell>{record.operationType}</TableCell>
+                  <TableCell>{formattedDateTime}</TableCell>
+                  <TableCell>{record.balanceBefore}</TableCell>
+                  <TableCell>{record.balanceAfter}</TableCell>
+                  <TableCell>{record.operationResponse}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={() => handleDeleteDialogOpen(record)}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )})}
           </TableBody>
         </Table>
         </TableContainer>
