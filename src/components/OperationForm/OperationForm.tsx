@@ -242,6 +242,7 @@ const OperationForm = ({
               onChange={(e) => setNumber1(Number(e.target.value))}
               margin='normal'
               variant='outlined'
+              type='number'
               fullWidth
             />
             {
@@ -252,6 +253,7 @@ const OperationForm = ({
               onChange={(e) => setNumber2(Number(e.target.value))}
               margin='normal'
               variant='outlined'
+              type='number'
               fullWidth
             />
             }
